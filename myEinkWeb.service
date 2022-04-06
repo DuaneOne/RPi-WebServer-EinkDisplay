@@ -1,0 +1,42 @@
+#   This service will restart the myEinkWeb.py script after 60Sec if it ever stops or after boot.
+#   The service file  created for myEinkWeb.py is saved to  /etc/systemd/system/myEinkWeb.service
+#
+#   Some helpful commands below:
+#          sudo  mv myEinkWeb.service /etc/systemd/system/myEinkWeb.service
+#          sudo  mv /etc/systemd/system/myEinkWeb.service /etc/systemd/system/myEinkWeb.service
+#          sudo chown pi:pi /etc/systemd/system/myEinkWeb.service    # changes user and group to pi
+#          sudo  chmod  644  /etc/systemd/system/myEinkWeb.service
+#
+#          sudo systemctl daemon-reload
+#          sudo systemctl enable myEinkWeb.service
+#
+#         sudo systemctl status myEinkWeb.service
+#         sudo systemctl stop myEinkWeb.service
+#         sudo systemctl start myEinkWeb.service
+#
+# print statements and errors output to   /var/log/syslog
+# as well as /var/log/daemon.log  
+#
+# ps aux    to list processes running     kill [the number in left column for python3]
+
+[Unit]
+Description=myEinkWeb Service
+After=network-online.target
+
+[Service]
+Type=idle
+WorkingDirectory=/home/pi/mycode/eink
+ExecStart=/usr/bin/python3 -u  /home/pi/mycode/eink/myEinkWeb.py  
+#  uncomment next line to wait until Rpi is able to see Router on the network
+#  Note your router may have a a different URL (IP address)
+ExecStartPre=/bin/sh -c 'while ! curl -sf http://192.168.1.1; do sleep 1; done'
+#ExecStartPre=/bin/sleep 30
+Restart=always
+RestartSec=20
+StandardOutput=syslog  
+StandardError=syslog
+SyslogIdentifier=myEinkWeb
+
+[Install]
+#WantedBy=muilti-user.target
+WantedBy=default.target
